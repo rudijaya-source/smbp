@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{ 
+    darkMode: false, 
+    mobileMenu: false, 
+    activeTab: 'home', 
+    isAdminLoggedIn: false,
+    showWelcome: true,
+    notification: { show: false, message: '', type: 'info' },
+    triggerNotification(msg, type='info') {
+        this.notification.show = true;
+        this.notification.message = msg;
+        this.notification.type = type;
+        setTimeout(() => this.notification.show = false, 4000);
+    }
+}" :class="{ 'dark': darkMode }" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMBP Portal - National University Joint Admission</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        /* Custom Premium Glassmorphism */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .dark .glass-nav {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(6, 182, 212, 0.3);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(6, 182, 212, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-tr from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-950 dark:via-slate-900 dark:to-cyan-950 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-300 relative pb-16">
+
+    <div x-data="{ loading: true }" x-init="setTimeout(() => loading = false, 1200)" x-show="loading" class="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center text-white">
+        <div class="relative flex items-center justify-center">
+            <div class="animate-spin rounded-full h-24 w-24 border-t-4 border-b-4 border-cyan-400"></div>
+            <div class="absolute animate-ping h-16 w-16 rounded-full border border-blue-400 opacity-75"></div>
+        </div>
+        <h2 class="mt-6 text-xl font-bold tracking-wider text-cyan-400 animate-pulse">SMBP PORTAL</h2>
+        <p class="text-xs text-slate-400 mt-2">Securing system environments...</p>
+    </div>
+
+    <div class="bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 text-white text-xs md:text-sm py-2 px-4 text-center font-medium relative z-40 flex items-center justify-center gap-2 shadow-sm">
+        <span class="bg-white/20 px-2 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider animate-pulse">Alert</span>
+        <span>Registration ends in less than 15 days. Complete your document portfolios immediately.</span>
+    </div>
+
+    <nav class="sticky top-0 z-40 glass-nav transition-all duration-300 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center gap-3 cursor-pointer" @click="activeTab = 'home'">
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20">
+                        <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-blue-400 dark:to-cyan-300 bg-clip-text text-transparent">SMBP 2026</span>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-semibold">National Admission</p>
+                    </div>
+                </div>
+
+                <div class="hidden lg:flex items-center gap-1 font-medium text-sm">
+                    <button @click="activeTab = 'home'" :class="activeTab === 'home' ? 'text-blue-600 dark:text-cyan-400 bg-blue-500/10' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-500/5'" class="px-3 py-2 rounded-xl transition">Home</button>
+                    <button @click="activeTab = 'requirements'" :class="activeTab === 'requirements' ? 'text-blue-600 dark:text-cyan-400 bg-blue-500/10' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-500/5'" class="px-3 py-2 rounded-xl transition">Requirements</button>
+                    <button @click="activeTab = 'schedule'" :class="activeTab === 'schedule' ? 'text-blue-600 dark:text-cyan-400 bg-blue-500/10' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-500/5'" class="px-3 py-2 rounded-xl transition">Schedule</button>
+                    <button @click="activeTab = 'universities'" :class="activeTab === 'universities' ? 'text-blue-600 dark:text-cyan-400 bg-blue-500/10' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-500/5'" class="px-3 py-2 rounded-xl transition">Universities</button>
+                    <button @click="activeTab = 'registration'" :class="activeTab === 'registration' ? 'text-blue-600 dark:text-cyan-400 bg-blue-500/10' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-500/5'" class="px-3 py-2 rounded-xl transition">Registration</button>
+                    <button @click="activeTab = 'results'" :class="activeTab === 'results' ? 'text-blue-600 dark:text-cyan-400 bg-blue-500/10' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-500/5'" class="px-3 py-2 rounded-xl transition">Check Results</button>
+                    <button @click="activeTab = 'faqs'" :class="activeTab === 'faqs' ? 'text-blue-600 dark:text-cyan-400 bg-blue-500/10' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-500/5'" class="px-3 py-2 rounded-xl transition">FAQs</button>
+                    <button @click="activeTab = 'contact'" :class="activeTab === 'contact' ? 'text-blue-600 dark:text-cyan-400 bg-blue-500/10' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-500/5'" class="px-3 py-2 rounded-xl transition">Contact</button>
+                </div>
+
+                <div class="hidden lg:flex items-center gap-3">
+                    <div x-data="{ time: '' }" x-init="setInterval(() => { 
+                        let d = new Date(); 
+                        time = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'}); 
+                    }, 1000)" class="text-xs font-mono bg-slate-200/50 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 border border-white/20">
+                        <span x-text="time"></span> WIB
+                    </div>
+
+                    <button @click="darkMode = !darkMode" class="p-2.5 rounded-xl bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:scale-105 transition shadow-sm">
+                        <i data-lucide="sun" x-show="darkMode" class="w-5 h-5 text-amber-400"></i>
+                        <i data-lucide="moon" x-show="!darkMode" class="w-5 h-5 text-blue-600"></i>
+                    </button>
+
+                    <button @click="activeTab = 'login'" class="px-4 py-2 text-sm font-semibold rounded-xl border border-blue-600 text-blue-600 dark:border-cyan-400 dark:text-cyan-400 hover:bg-blue-500/10 transition">Portal Login</button>
+                    <button @click="activeTab = 'admin-dashboard'" class="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl hover:opacity-90 shadow-lg shadow-blue-500/20 hover:scale-[1.02] transition flex items-center gap-1.5">
+                        <i data-lucide="shield-check" class="w-4 h-4"></i> Admin Panel
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-3 lg:hidden">
+                    <button @click="darkMode = !darkMode" class="p-2 rounded-lg bg-white/50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300">
+                        <i data-lucide="sun" x-show="darkMode" class="w-5 h-5"></i>
+                        <i data-lucide="moon" x-show="!darkMode" class="w-5 h-5"></i>
+                    </button>
+                    <button @click="mobileMenu = !mobileMenu" class="p-2 rounded-lg bg-slate-200/60 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300">
+                        <i data-lucide="menu" x-show="!mobileMenu" class="w-6 h-6"></i>
+                        <i data-lucide="x" x-show="mobileMenu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="mobileMenu" x-transition class="lg:hidden glass-panel border-b border-slate-200 dark:border-slate-800 absolute w-full left-0 px-4 pt-2 pb-6 space-y-2 shadow-xl">
+            <button @click="activeTab = 'home'; mobileMenu = false" class="block w-full text-left px-4 py-2.5 rounded-xl font-medium" :class="activeTab==='home'?'bg-blue-500/20 text-blue-600 dark:text-cyan-400':'text-slate-700 dark:text-slate-300'">Home</button>
+            <button @click="activeTab = 'requirements'; mobileMenu = false" class="block w-full text-left px-4 py-2.5 rounded-xl font-medium" :class="activeTab==='requirements'?'bg-blue-500/20 text-blue-600 dark:text-cyan-400':'text-slate-700 dark:text-slate-300'">Requirements</button>
+            <button @click="activeTab = 'schedule'; mobileMenu = false" class="block w-full text-left px-4 py-2.5 rounded-xl font-medium" :class="activeTab==='schedule'?'bg-blue-500/20 text-blue-600 dark:text-cyan-400':'text-slate-700 dark:text-slate-300'">Schedule</button>
+            <button @click="activeTab = 'universities'; mobileMenu = false" class="block w-full text-left px-4 py-2.5 rounded-xl font-medium" :class="activeTab==='universities'?'bg-blue-500/20 text-blue-600 dark:text-cyan-400':'text-slate-700 dark:text-slate-300'">Universities</button>
+            <button @click="activeTab = 'registration'; mobileMenu = false" class="block w-full text-left px-4 py-2.5 rounded-xl font-medium" :class="activeTab==='registration'?'bg-blue-500/20 text-blue-600 dark:text-cyan-400':'text-slate-700 dark:text-slate-300'">Registration</button>
+            <button @click="activeTab = 'results'; mobileMenu = false" class="block w-full text-left px-4 py-2.5 rounded-xl font-medium" :class="activeTab==='results'?'bg-blue-500/20 text-blue-600 dark:text-cyan-400':'text-slate-700 dark:text-slate-300'">Check Results</button>
+            <button @click="activeTab = 'faqs'; mobileMenu = false" class="block w-full text-left px-4 py-2.5 rounded-xl font-medium" :class="activeTab==='faqs'?'bg-blue-500/20 text-blue-600 dark:text-cyan-400':'text-slate-700 dark:text-slate-300'">FAQs</button>
+            <button @click="activeTab = 'contact'; mobileMenu = false" class="block w-full text-left px-4 py-2.5 rounded-xl font-medium" :class="activeTab==='contact'?'bg-blue-500/20 text-blue-600 dark:text-cyan-400':'text-slate-700 dark:text-slate-300'">Contact</button>
+            <hr class="border-slate-200 dark:border-slate-800 my-2">
+            <div class="grid grid-cols-2 gap-2 pt-2">
+                <button @click="activeTab = 'login'; mobileMenu = false" class="py-2.5 text-center text-sm font-semibold rounded-xl border border-blue-500 text-blue-500 dark:text-cyan-400 dark:border-cyan-400">Login</button>
+                <button @click="activeTab = 'admin-dashboard'; mobileMenu = false" class="py-2.5 text-center text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-blue-600 to-cyan-500">Admin</button>
+            </div>
+        </div>
+    </nav>
+
+    <div x-show="notification.show" x-transition class="fixed bottom-6 right-6 z-50 p-4 rounded-xl shadow-xl border glass-panel flex items-center gap-3 max-w-sm" :class="notification.type==='success'?'border-emerald-500/30':'border-blue-500/30'">
+        <div class="w-8 h-8 rounded-full flex items-center justify-center" :class="notification.type==='success'?'bg-emerald-500/20 text-emerald-500':'bg-blue-500/20 text-blue-500'">
+            <i data-lucide="info" class="w-5 h-5"></i>
+        </div>
+        <div class="flex-1">
+            <p class="text-sm font-semibold" x-text="notification.message"></p>
+        </div>
+        <button @click="notification.show = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <section x-show="activeTab === 'home'" x-transition class="space-y-12">
+            <div class="grid lg:grid-cols-12 gap-8 items-center pt-4">
+                <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-cyan-400 font-semibold text-xs uppercase tracking-wider mx-auto lg:mx-0">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Academic Cycle 2026 / 2027 Open
+                    </div>
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
+                        Your Gateway to <br>
+                        <span class="bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-400 bg-clip-text text-transparent">Top-Tier Universities</span>
+                    </h1>
+                    <p class="text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto lg:mx-0">
+                        The National Achievement-Based Joint Admission selection (SMBP) processes standardized evaluation mapping metrics against regional outstanding talents. Registered entities gain structured validation pipelines.
+                    </p>
+                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
+                        <button @click="activeTab = 'registration'" class="px-6 py-3.5 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl hover:opacity-95 shadow-lg shadow-cyan-500/20 hover:scale-[1.02] transition flex items-center gap-2">
+                            Apply Admission Now <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                        <button @click="activeTab = 'requirements'" class="px-6 py-3.5 text-sm font-bold rounded-xl glass-panel text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 hover:bg-slate-500/5 transition flex items-center gap-2">
+                            <i data-lucide="file-text" class="w-4 h-4"></i> Guidelines & Handbook
+                        </button>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5">
+                    <div class="glass-panel rounded-2xl p-6 sm:p-8 border border-white/20 shadow-2xl relative overflow-hidden group">
+                        <div class="absolute -right-12 -top-12 w-32 h-32 bg-cyan-400/10 rounded-full blur-2xl"></div>
+                        <div class="absolute -left-12 -bottom-12 w-32 h-32 bg-blue-400/10 rounded-full blur-2xl"></div>
+                        
+                        <div class="relative text-center space-y-6">
+                            <div>
+                                <h3 class="text-xs uppercase font-bold text-slate-400 tracking-wider">Registration Closing Countdown</h3>
+                                <div class="h-1 w-12 bg-gradient-to-r from-blue-500 to-cyan-400 mx-auto mt-2 rounded"></div>
+                            </div>
+
+                            <div x-data="{
+                                days: '14',
+                                hours: '22',
+                                minutes: '41',
+                                seconds: '05',
+                                init() {
+                                    setInterval(() => {
+                                        let s = parseInt(this.seconds);
+                                        if(s > 0) { this.seconds = String(s-1).padStart(2, '0'); }
+                                        else { this.seconds = '59'; }
+                                    }, 1000);
+                                }
+                            }" class="grid grid-cols-4 gap-2 sm:gap-4">
+                                <div class="p-3 bg-slate-900/5 dark:bg-white/5 border border-white/10 rounded-xl">
+                                    <span class="text-2xl sm:text-3xl font-mono font-bold text-blue-600 dark:text-cyan-400" x-text="days"></span>
+                                    <p class="text-[10px] text-slate-400 uppercase font-semibold mt-1">Days</p>
+                                </div>
+                                <div class="p-3 bg-slate-900/5 dark:bg-white/5 border border-white/10 rounded-xl">
+                                    <span class="text-2xl sm:text-3xl font-mono font-bold text-blue-600 dark:text-cyan-400" x-text="hours"></span>
+                                    <p class="text-[10px] text-slate-400 uppercase font-semibold mt-1">Hours</p>
+                                </div>
+                                <div class="p-3 bg-slate-900/5 dark:bg-white/5 border border-white/10 rounded-xl">
+                                    <span class="text-2xl sm:text-3xl font-mono font-bold text-blue-600 dark:text-cyan-400" x-text="minutes"></span>
+                                    <p class="text-[10px] text-slate-400 uppercase font-semibold mt-1">Mins</p>
+                                </div>
+                                <div class="p-3 bg-slate-900/5 dark:bg-white/5 border border-white/10 rounded-xl">
+                                    <span class="text-2xl sm:text-3xl font-mono font-bold text-blue-600 dark:text-cyan-400" x-text="seconds"></span>
+                                    <p class="text-[10px] text-slate-400 uppercase font-semibold mt-1">Secs</p>
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-blue-500/5 rounded-xl border border-blue-500/10 text-left text-xs space-y-2">
+                                <div class="flex justify-between text-slate-500 dark:text-slate-400">
+                                    <span>Target Close Date:</span>
+                                    <span class="font-semibold text-slate-700 dark:text-slate-200">June 17, 2026</span>
+                                </div>
+                                <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-gradient-to-r from-blue-500 to-cyan-400 h-full w-[78%] rounded-full"></div>
+                                </div>
+                                <p class="text-[10px] text-slate-400 italic text-center pt-1">78% of national seat allocations filled.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div class="glass-panel p-6 rounded-2xl border border-white/20 shadow-lg flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                        <i data-lucide="users" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400 uppercase">Registered Applicants</p>
+                        <h4 class="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">412,894</h4>
+                    </div>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl border border-white/20 shadow-lg flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
+                        <i data-lucide="building-2" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400 uppercase">Partner Universities</p>
+                        <h4 class="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">142</h4>
+                    </div>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl border border-white/20 shadow-lg flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                        <i data-lucide="award" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400 uppercase">Available Programs</p>
+                        <h4 class="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">3,850+</h4>
+                    </div>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl border border-white/20 shadow-lg flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400 uppercase">System Integrity Rate</p>
+                        <h4 class="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">99.98%</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold tracking-tight">Important Announcements</h2>
+                        <p class="text-xs text-slate-400">Verified official updates regarding selection processes.</p>
+                    </div>
+                    <button class="text-sm font-semibold text-blue-500 dark:text-cyan-400 flex items-center gap-1 hover:underline">View Archive <i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="glass-panel p-6 rounded-2xl border border-white/20 hover:border-blue-500/30 transition shadow-md flex flex-col justify-between space-y-4">
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="bg-blue-500/10 text-blue-600 dark:text-cyan-400 font-bold px-2.5 py-1 rounded-md">REGISTRATION HANDBOOK</span>
+                                <span class="text-slate-400 font-mono">June 02, 2026</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Release of Technical Guidelines for Uploading Student Achievement Portfolios</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">All prospective students submitting artistic or sports-related programs are strictly mandated to synchronize portfolios with explicit regional sizing bounds.</p>
+                        </div>
+                        <button @click="triggerNotification('Downloading Technical_Guidelines_v2.pdf')" class="text-xs font-semibold text-blue-500 dark:text-cyan-400 flex items-center gap-1 hover:underline pt-2">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i> Download PDF Document (4.2 MB)
+                        </button>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-2xl border border-white/20 hover:border-blue-500/30 transition shadow-md flex flex-col justify-between space-y-4">
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold px-2.5 py-1 rounded-md">SYSTEM UPDATE</span>
+                                <span class="text-slate-400 font-mono">May 29, 2026</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Single Sign-On (SSO) Interoperability with National Student Database (NISN)</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">The verification mechanism now allows active automated API callbacks to the primary school ledger, reducing manual data attestation requirements.</p>
+                        </div>
+                        <button @click="activeTab = 'login'" class="text-xs font-semibold text-blue-500 dark:text-cyan-400 flex items-center gap-1 hover:underline pt-2">
+                            Test Account Connectivity <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section x-show="activeTab === 'login'" x-transition class="max-w-md mx-auto py-8">
+            <div x-data="{ mode: 'applicant' }" class="glass-panel rounded-2xl border border-white/20 shadow-2xl overflow-hidden">
+                <div class="grid grid-cols-2 border-b border-slate-200 dark:border-slate-800 text-sm font-semibold">
+                    <button @click="mode = 'applicant'" :class="mode === 'applicant' ? 'bg-blue-500/10 text-blue-600 dark:text-cyan-400 border-b-2 border-blue-500' : 'text-slate-400 hover:text-slate-600'" class="py-4 text-center transition">Applicant Portal</button>
+                    <button @click="mode = 'admin'" :class="mode === 'admin' ? 'bg-blue-500/10 text-blue-600 dark:text-cyan-400 border-b-2 border-blue-500' : 'text-slate-400 hover:text-slate-600'" class="py-4 text-center transition">Admin / Registrar</button>
+                </div>
+
+                <form @submit.prevent="
+                    if(mode==='admin'){
+                        isAdminLoggedIn = true;
+                        activeTab = 'admin-dashboard';
+                        triggerNotification('Administrator console authorization successful.', 'success');
+                    } else {
+                        triggerNotification('Applicant verification simulation authorized.', 'success');
+                        activeTab = 'registration';
+                    }
+                " class="p-6 sm:p-8 space-y-5">
+                    <div class="text-center space-y-1">
+                        <h2 class="text-xl font-bold tracking-tight">Secure Access Login</h2>
+                        <p class="text-xs text-slate-400" x-text="mode === 'applicant' ? 'Enter credentials associated with your official NISN ledger.' : 'Privileged credentials required to operate cluster workflows.'"></p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-semibold uppercase tracking-wider text-slate-400">Identification Code / Email</label>
+                            <div class="relative">
+                                <i data-lucide="user" class="absolute left-3.5 top-3 w-4 h-4 text-slate-400"></i>
+                                <input type="text" required placeholder="e.g., 004829103" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-900/5 dark:bg-white/5 focus:outline-none focus:border-blue-500 text-sm font-medium">
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between items-center">
+                                <label class="text-xs font-semibold uppercase tracking-wider text-slate-400">Secret Security Password</label>
+                                <button type="button" @click="triggerNotification('Password reset routine triggered via registered phone/email link.')" class="text-xs font-medium text-blue-500 hover:underline">Forgot Password?</button>
+                            </div>
+                            <div class="relative">
+                                <i data-lucide="lock" class="absolute left-3.5 top-3 w-4 h-4 text-slate-400"></i>
+                                <input type="password" required placeholder="••••••••••••" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-900/5 dark:bg-white/5 focus:outline-none focus:border-blue-500 text-sm font-medium">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center">
+                        <input id="remember_me" type="checkbox" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 dark:border-slate-700">
+                        <label for="remember_me" class="ml-2 text-xs font-medium text-slate-500 dark:text-slate-400 select-none">Remember this station for 30 cycles</label>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl hover:opacity-95 shadow-md transition">
+                        Authenticate Account Identity
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <section x-show="activeTab === 'results'" x-transition class="space-y-8 max-w-4xl mx-auto">
+            <div class="text-center space-y-2">
+                <h2 class="text-3xl font-extrabold tracking-tight">Admission Results Center</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Input official reference identities to query allocation parameters.</p>
+            </div>
+
+            <div x-data="{ searched: false, passed: true, partNo: '', nisn: '' }" class="space-y-6">
+                <div class="glass-panel p-6 rounded-2xl border border-white/20 shadow-xl">
+                    <form @submit.prevent="if(partNo && nisn){ searched = true; passed = (partNo.endsWith('7') || partNo.endsWith('3')); } else { alert('Please fulfill requirements'); }" class="grid sm:grid-cols-2 gap-4 items-end">
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold uppercase tracking-wider text-slate-400">Registration Number</label>
+                            <input type="text" x-model="partNo" placeholder="SMBP-2026-XXXX" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-900/5 dark:bg-white/5 focus:outline-none focus:border-cyan-500 text-sm font-mono font-semibold">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold uppercase tracking-wider text-slate-400">National Student ID (NISN)</label>
+                            <input type="text" x-model="nisn" placeholder="00XXXXXXXX" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-900/5 dark:bg-white/5 focus:outline-none focus:border-cyan-500 text-sm font-mono font-semibold">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <button type="submit" class="w-full py-3 font-bold text-sm text-white bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl shadow-md hover:opacity-95 transition flex items-center justify-center gap-2">
+                                <i data-lucide="search" class="w-4 h-4"></i> Query Central Ledger Database
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div x-show="searched" x-transition class="glass-panel rounded-2xl border border-white/20 shadow-xl overflow-hidden">
+                    <div class="p-6 text-center space-y-4" :class="passed ? 'bg-emerald-500/10' : 'bg-rose-500/10'">
+                        <div class="w-14 h-14 rounded-full mx-auto flex items-center justify-center" :class="passed ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/20 text-rose-600 dark:text-rose-400'">
+                            <i :data-lucide="passed ? 'check-circle' : 'alert-triangle'" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold" x-text="passed ? 'CONGRATULATIONS! YOU HAVE PASSED' : 'WE REGRET TO INFORM YOU'"></h3>
+                            <p class="text-xs text-slate-400 mt-1" x-text="passed ? 'You have been selected as an active eligible candidate for higher education.' : 'Your criteria metrics did not optimize within the top percentile bounds for this bracket.'"></p>
+                        </div>
+                    </div>
+
+                    <div class="p-6 space-y-6">
+                        <table class="w-full text-sm border-collapse">
+                            <tbody>
+                                <tr class="border-b border-slate-200 dark:border-slate-800">
+                                    <td class="py-3 font-medium text-slate-400">Applicant Identity Name</td>
+                                    <td class="py-3 font-bold text-right">ADITYA PRATAMA NUGRAHA</td>
+                                </tr>
+                                <tr class="border-b border-slate-200 dark:border-slate-800">
+                                    <td class="py-3 font-medium text-slate-400">Registration Reference Code</td>
+                                    <td class="py-3 font-mono text-right" x-text="partNo"></td>
+                                </tr>
+                                <tr class="border-b border-slate-200 dark:border-slate-800">
+                                    <td class="py-3 font-medium text-slate-400">Allocated Institution Target</td>
+                                    <td class="py-3 font-bold text-right text-blue-600 dark:text-cyan-400" x-text="passed ? 'Universitas Indonesia (UI)' : '-'"></td>
+                                </tr>
+                                <tr class="border-b border-slate-200 dark:border-slate-800">
+                                    <td class="py-3 font-medium text-slate-400">Assigned Study Concentration</td>
+                                    <td class="py-3 font-semibold text-right" x-text="passed ? 'B.Sc. Computer Science / Software Systems' : '-'"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="flex flex-wrap items-center justify-center gap-3">
+                            <button @click="window.print()" class="px-5 py-2.5 text-xs font-bold text-white bg-slate-800 dark:bg-slate-200 dark:text-slate-900 rounded-xl hover:opacity-90 flex items-center gap-1.5 transition">
+                                <i data-lucide="printer" class="w-4 h-4"></i> Print Result Slips
+                            </button>
+                            <button @click="triggerNotification('Downloading official credential authentication tokens...')" class="px-5 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl hover:opacity-95 flex items-center gap-1.5 transition">
+                                <i data-lucide="download-cloud" class="w-4 h-4"></i> Secure Download Portal Offer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section x-show="activeTab === 'registration'" x-transition class="max-w-3xl mx-auto space-y-6">
+            <div class="space-y-1">
+                <h2 class="text-3xl font-extrabold tracking-tight">Admission Registration Process</h2>
+                <p class="text-xs text-slate-400">Ensure data declarations accurately represent secondary school certification cards.</p>
+            </div>
+
+            <div x-data="{ 
+                step: 1,
+                form: { name: '', nisn: '', school: '', major: '', choice1: '', choice2: '' },
+                profilePic: null,
+                handlePic(e) {
+                    const file = e.target.files[0];
+                    if(file) { this.profilePic = URL.createObjectURL(file); }
+                }
+            }" class="glass-panel rounded-2xl border border-white/20 shadow-xl overflow-hidden">
+                
+                <div class="bg-slate-900/5 dark:bg-white/5 border-b border-slate-200 dark:border-slate-800 p-4 grid grid-cols-4 text-center text-xs font-semibold tracking-wide">
+                    <div :class="step >= 1 ? 'text-blue-500 dark:text-cyan-400' : 'text-slate-400'">1. Profile</div>
+                    <div :class="step >= 2 ? 'text-blue-500 dark:text-cyan-400' : 'text-slate-400'">2. Academic</div>
+                    <div :class="step >= 3 ? 'text-blue-500 dark:text-cyan-400' : 'text-slate-400'">3. Selection</div>
+                    <div :class="step >= 4 ? 'text-blue-500 dark:text-cyan-400' : 'text-slate-400'">4. Preview</div>
+                </div>
+
+                <div class="p-6 sm:p-8 space-y-6">
+                    <div x-show="step === 1" class="space-y-4">
+                        <div class="flex flex-col items-center gap-3 pb-4">
+                            <div class="w-24 h-24 rounded-full bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 overflow-hidden relative group">
+                                <template x-if="profilePic">
+                                    <img :src="profilePic" class="w-full h-full object-cover">
+                                </template>
+                                <template x-if="!profilePic">
+                                    <div class="w-full h-full flex items-center justify-center text-slate-400"><i data-lucide="user-plus" class="w-8 h-8"></i></div>
+                                </template>
+                            </div>
+                            <label class="px-3 py-1 bg-blue-500/10 text-blue-500 text-xs font-semibold rounded-md cursor-pointer hover:bg-blue-500/20">
+                                Upload Photo (4x6 Aspect)
+                                <input type="file" @change="handlePic" class="hidden" accept="image/*">
+                            </label>
+                        </div>
+
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold uppercase text-slate-400">Full Legal Name</label>
+                                <input type="text" x-model="form.name" class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent text-sm">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold uppercase text-slate-400">National ID Registry (NISN)</label>
+                                <input type="text" x-model="form.nisn" class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent text-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div x-show="step === 2" class="space-y-4">
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold uppercase text-slate-400">Origin High School Name</label>
+                            <input type="text" x-model="form.school" placeholder="SMAN 1 Jakarta" class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent text-sm">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold uppercase text-slate-400">Academic Major Concentration</label>
+                            <select x-model="form.major" class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-sm">
+                                <option value="">Select Department Cluster</option>
+                                <option value="Natural Sciences">Natural Sciences (MIPA)</option>
+                                <option value="Social Sciences">Social Sciences (IPS)</option>
+                                <option value="Vocational Engineering">Vocational Technology Engineering</option>
+                            </select>
+                        </div>
+                        <div class="p-4 bg-blue-500/5 rounded-xl border border-blue-500/10 space-y-2">
+                            <p class="text-xs font-bold text-blue-500 uppercase tracking-wider">Document Upload Manifest</p>
+                            <div class="flex items-center justify-between text-xs text-slate-400">
+                                <span>Certified Transcripts Semesters 1-5 (.pdf)</span>
+                                <span class="text-emerald-500 font-semibold flex items-center gap-1"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Attached</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div x-show="step === 3" class="space-y-4">
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold uppercase text-slate-400">Primary Priority Choice Institution</label>
+                            <select x-model="form.choice1" class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-sm">
+                                <option value="">Select First Destination</option>
+                                <option value="Universitas Indonesia - Computer Science">Universitas Indonesia - Computer Science</option>
+                                <option value="Institut Teknologi Bandung - Informatics">Institut Teknologi Bandung - Informatics</option>
+                                <option value="Universitas Gadjah Mada - Information Systems">Universitas Gadjah Mada - Information Systems</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold uppercase text-slate-400">Secondary Backup Choice Institution</label>
+                            <select x-model="form.choice2" class="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-sm">
+                                <option value="">Select Second Destination</option>
+                                <option value="Universitas Indonesia - Data Science">Universitas Indonesia - Data Science</option>
+                                <option value="Institut Teknologi Bandung - Mechanical Eng.">Institut Teknologi Bandung - Mechanical Eng.</option>
+                                <option value="Universitas Gadjah Mada - Electrical Eng.">Universitas Gadjah UGM - Electrical Eng.</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div x-show="step === 4" class="space-y-4">
+                        <div class="p-4 bg-amber-500/10 rounded-xl text-xs text-amber-600 font-semibold border border-amber-500/20">
+                            Review your input data. Submitting finalized manifests blocks future entry field synchronization adjustments.
+                        </div>
+                        <div class="grid grid-cols-2 gap-y-3 gap-x-4 text-xs border border-slate-200 dark:border-slate-800 p-4 rounded-xl">
+                            <div><p class="text-slate-400">Full Name</p><p class="font-bold text-sm" x-text="form.name || 'N/A'"></p></div>
+                            <div><p class="text-slate-400">NISN Identifier</p><p class="font-bold text-sm font-mono" x-text="form.nisn || 'N/A'"></p></div>
+                            <div class="col-span-2 border-t border-slate-200 dark:border-slate-800 my-1"></div>
+                            <div><p class="text-slate-400">High School Origin</p><p class="font-semibold" x-text="form.school || 'N/A'"></p></div>
+                            <div><p class="text-slate-400">Selected Track 1</p><p class="font-semibold text-blue-500 dark:text-cyan-400" x-text="form.choice1 || 'N/A'"></p></div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-4 border-t border-slate-200 dark:border-slate-800">
+                        <button type="button" x-show="step > 1" @click="step--" class="px-4 py-2 text-xs font-bold rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200">Previous Phase</button>
+                        <div x-show="step === 1"></div>
+                        
+                        <button type="button" x-show="step < 4" @click="step++" class="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 ml-auto">Advance Next</button>
+                        <button type="button" x-show="step === 4" @click="triggerNotification('Application successfully committed to the national ledger.', 'success'); activeTab = 'home'" class="px-6 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-500 rounded-lg shadow-md ml-auto">Finalize Submit Manifest</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section x-show="activeTab === 'requirements'" x-transition class="space-y-8 max-w-4xl mx-auto">
+            <div class="text-center space-y-2">
+                <h2 class="text-3xl font-extrabold tracking-tight">Eligibility Criteria & Document Requirements</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Ensure complete structural compliance parameters prior to initiating onboarding sequences.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="md:col-span-2 space-y-6">
+                    <div class="glass-panel p-6 rounded-2xl border border-white/20 shadow-md space-y-4">
+                        <h3 class="text-lg font-bold flex items-center gap-2 text-blue-600 dark:text-cyan-400">
+                            <i data-lucide="check-square" class="w-5 h-5"></i> General Applicant Criteria
+                        </h3>
+                        <ul class="space-y-3 text-sm text-slate-600 dark:text-slate-300">
+                            <li class="flex gap-2.5"><i data-lucide="arrow-right" class="w-4 h-4 text-cyan-500 shrink-0 mt-0.5"></i> Senior high school students graduating in the current calendar cycle (2026) possessing official tracked credentials.</li>
+                            <li class="flex gap-2.5"><i data-lucide="arrow-right" class="w-4 h-4 text-cyan-500 shrink-0 mt-0.5"></i> High outstanding placement ranks matched consistently within institutional school-eligible ranking filters.</li>
+                            <li class="flex gap-2.5"><i data-lucide="arrow-right" class="w-4 h-4 text-cyan-500 shrink-0 mt-0.5"></i> Maintenance of exceptional synchronized grade ledgers across active semesters 1 to 5.</li>
+                        </ul>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-2xl border border-white/20 shadow-md space-y-4">
+                        <h3 class="text-lg font-bold flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                            <i data-lucide="folder-archive" class="w-5 h-5"></i> Portfolio Requirements Map
+                        </h3>
+                        <div class="grid sm:grid-cols-2 gap-4 text-xs font-medium">
+                            <div class="p-3 bg-slate-900/5 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-slate-800">
+                                <p class="font-bold text-slate-700 dark:text-slate-200">Fine Arts & Design</p>
+                                <p class="text-slate-400 mt-1">Black & white compositional drawings, narrative drawing portfolio, and declarative self-attestation statements.</p>
+                            </div>
+                            <div class="p-3 bg-slate-900/5 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-slate-800">
+                                <p class="font-bold text-slate-700 dark:text-slate-200">Athletics & Sports</p>
+                                <p class="text-slate-400 mt-1">Video files measuring physical competence indicators, medical verification sheets, and local event placement certification logs.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl border border-white/20 shadow-md h-fit space-y-4">
+                    <h4 class="text-sm font-bold uppercase tracking-wider text-slate-400">Document Blueprint Checklist</h4>
+                    <div class="space-y-3 text-xs">
+                        <div class="flex items-center gap-2.5"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i> <span>Recent Passport Photo (JPEG format)</span></div>
+                        <div class="flex items-center gap-2.5"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i> <span>Validated Semester 1-5 Transcripts</span></div>
+                        <div class="flex items-center gap-2.5"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i> <span>National Registry Family Card (KK)</span></div>
+                        <div class="flex items-center gap-2.5"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i> <span>Achievement Award Certifications</span></div>
+                    </div>
+                    <hr class="border-slate-200 dark:border-slate-800">
+                    <button @click="triggerNotification('Initiating download protocol for Admission_Guide_Book_2026.pdf')" class="w-full py-2.5 bg-blue-600 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2">
+                        <i data-lucide="download" class="w-3.5 h-3.5"></i> Download Comprehensive Guidebook
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section x-show="activeTab === 'schedule'" x-transition class="space-y-8 max-w-4xl mx-auto">
+            <div class="text-center space-y-2">
+                <h2 class="text-3xl font-extrabold tracking-tight">Official Allocation Timeline Schedule</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Strict chronological evaluation map. Mark critical target dates accordingly.</p>
+            </div>
+
+            <div class="relative border-l-2 border-blue-500/30 dark:border-cyan-500/30 ml-4 md:ml-32 space-y-8">
+                
+                <div class="relative pl-6 md:pl-8">
+                    <div class="absolute -left-[9px] top-1 w-4 h-4 bg-emerald-500 rounded-full ring-4 ring-emerald-500/20"></div>
+                    <div class="absolute hidden md:block -left-32 top-0.5 w-24 text-right font-mono text-xs font-semibold text-slate-400">Jan 12, 2026</div>
+                    <div class="glass-panel p-5 rounded-xl border border-white/20 shadow-sm">
+                        <span class="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded uppercase">Completed</span>
+                        <h4 class="font-bold text-base mt-1 text-slate-800 dark:text-slate-100">School Profile Base Registration</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Institutions complete mapping parameters outlining potential student allocation slots.</p>
+                    </div>
+                </div>
+
+                <div class="relative pl-6 md:pl-8">
+                    <div class="absolute -left-[9px] top-1 w-4 h-4 bg-emerald-500 rounded-full ring-4 ring-emerald-500/20"></div>
+                    <div class="absolute hidden md:block -left-32 top-0.5 w-24 text-right font-mono text-xs font-semibold text-slate-400">Feb 14, 2026</div>
+                    <div class="glass-panel p-5 rounded-xl border border-white/20 shadow-sm">
+                        <span class="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded uppercase">Completed</span>
+                        <h4 class="font-bold text-base mt-1 text-slate-800 dark:text-slate-100">Eligible Student List Proclamations</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Automated parameters establish localized rankings determining authorized applying candidates.</p>
+                    </div>
+                </div>
+
+                <div class="relative pl-6 md:pl-8">
+                    <div class="absolute -left-[9px] top-1 w-4 h-4 bg-blue-500 rounded-full ring-4 ring-blue-500/20 animate-pulse"></div>
+                    <div class="absolute hidden md:block -left-32 top-0.5 w-24 text-right font-mono text-xs font-semibold text-blue-500 dark:text-cyan-400">May 15 - Jun 17</div>
+                    <div class="glass-panel p-5 rounded-xl border border-blue-500/20 shadow-md bg-blue-500/5">
+                        <span class="text-[10px] font-bold text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded uppercase animate-bounce">Active Window</span>
+                        <h4 class="font-bold text-base mt-1 text-slate-800 dark:text-slate-100">Applicant Form & Portfolio Submissions</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Candidates establish accounts, fulfill university track routing targets, and supply digital artifacts.</p>
+                    </div>
+                </div>
+
+                <div class="relative pl-6 md:pl-8">
+                    <div class="absolute -left-[9px] top-1 w-4 h-4 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+                    <div class="absolute hidden md:block -left-32 top-0.5 w-24 text-right font-mono text-xs font-semibold text-slate-400">July 04, 2026</div>
+                    <div class="glass-panel p-5 rounded-xl border border-white/20 shadow-sm">
+                        <span class="text-[10px] font-bold text-slate-400 bg-slate-400/10 px-2 py-0.5 rounded uppercase">Pending</span>
+                        <h4 class="font-bold text-base mt-1 text-slate-800 dark:text-slate-100">National Final Selection Ledger Release</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Central mainframe optimization modules process target tracking nodes to resolve allocation slips.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section x-show="activeTab === 'universities'" x-transition class="space-y-6" x-data="{ 
+            searchQuery: '',
+            universities: [
+                { code: '3111', name: 'Universitas Indonesia (UI)', location: 'Depok', accred: 'A', spots: 1420 },
+                { code: '3211', name: 'Institut Teknologi Bandung (ITB)', location: 'Bandung', accred: 'A', spots: 1150 },
+                { code: '3311', name: 'Universitas Gadjah Mada (UGM)', location: 'Yogyakarta', accred: 'A', spots: 1680 },
+                { code: '3511', name: 'Universitas Airlangga (UNAIR)', location: 'Surabaya', accred: 'A', spots: 1210 },
+                { code: '1111', name: 'Universitas Syiah Kuala (USK)', location: 'Banda Aceh', accred: 'B', spots: 980 }
+            ]
+        }">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-3xl font-extrabold tracking-tight">Academic Institution Registry</h2>
+                    <p class="text-xs text-slate-400">Real-time status capacity allocations across tracked higher-education networks.</p>
+                </div>
+                <div class="relative max-w-sm w-full">
+                    <i data-lucide="search" class="absolute left-3.5 top-3 w-4 h-4 text-slate-400"></i>
+                    <input type="text" x-model="searchQuery" placeholder="Search institution names or codes..." class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 focus:outline-none focus:border-blue-500 text-xs font-medium">
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-2xl border border-white/20 shadow-xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-900/5 dark:bg-white/5 border-b border-slate-200 dark:border-slate-800 text-slate-400 uppercase tracking-wider font-semibold">
+                                <th class="p-4">Registry Code</th>
+                                <th class="p-4">Institution Structural Entity Name</th>
+                                <th class="p-4">Regional Zone</th>
+                                <th class="p-4 text-center">Accreditation</th>
+                                <th class="p-4 text-right">SMBP Seat Target Capacity</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-slate-800 font-medium">
+                            <template x-for="uni in universities.filter(u => u.name.toLowerCase().includes(searchQuery.toLowerCase()) || u.code.includes(searchQuery))">
+                                <tr class="hover:bg-slate-500/5 transition">
+                                    <td class="p-4 font-mono font-bold text-blue-500 dark:text-cyan-400" x-text="uni.code"></td>
+                                    <td class="p-4 font-bold text-sm text-slate-800 dark:text-slate-100" x-text="uni.name"></td>
+                                    <td class="p-4 text-slate-500 dark:text-slate-400" x-text="uni.location"></td>
+                                    <td class="p-4 text-center"><span class="bg-blue-500/10 text-blue-600 dark:text-cyan-400 font-bold px-2 py-0.5 rounded" x-text="uni.accred"></span></td>
+                                    <td class="p-4 text-right font-mono font-semibold" x-text="uni.spots"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section x-show="activeTab === 'faqs'" x-transition class="max-w-3xl mx-auto space-y-6">
+            <div class="text-center space-y-2">
+                <h2 class="text-3xl font-extrabold tracking-tight">Frequently Asked Questions</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Quick resolutions for common application blockages.</p>
+            </div>
+
+            <div x-data="{ activeFaq: null }" class="space-y-4">
+                
+                <div class="glass-panel rounded-xl border border-white/20 overflow-hidden shadow-sm">
+                    <button @click="activeFaq = activeFaq === 1 ? null : 1" class="w-full p-4 text-left font-bold text-sm flex justify-between items-center text-slate-800 dark:text-slate-100">
+                        <span>Can I change selection parameters after portfolio commit confirmation?</span>
+                        <i data-lucide="chevron-down" :class="activeFaq === 1 ? 'rotate-180' : ''" class="w-4 h-4 text-blue-500 transition-transform"></i>
+                    </button>
+                    <div x-show="activeFaq === 1" x-transition class="p-4 bg-slate-900/5 dark:bg-white/5 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Negative. Once final submission signatures register via active digital hashes, all entity properties lock against adjustment loops to prevent data collision records in selection batches.
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-xl border border-white/20 overflow-hidden shadow-sm">
+                    <button @click="activeFaq = activeFaq === 2 ? null : 2" class="w-full p-4 text-left font-bold text-sm flex justify-between items-center text-slate-800 dark:text-slate-100">
+                        <span>How does the system resolve school eligibility quotas?</span>
+                        <i data-lucide="chevron-down" :class="activeFaq === 2 ? 'rotate-180' : ''" class="w-4 h-4 text-blue-500 transition-transform"></i>
+                    </button>
+                    <div x-show="activeFaq === 2" x-transition class="p-4 bg-slate-900/5 dark:bg-white/5 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Quotas adjust dynamically calculated by institutional accreditation profiles: Accreditation 'A' secures top 40% allocations, 'B' yields top 25%, while 'C' and unaccredited variants populate the top 5% boundary blocks.
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-xl border border-white/20 overflow-hidden shadow-sm">
+                    <button @click="activeFaq = activeFaq === 3 ? null : 3" class="w-full p-4 text-left font-bold text-sm flex justify-between items-center text-slate-800 dark:text-slate-100">
+                        <span>What file configurations define acceptable portfolio constraints?</span>
+                        <i data-lucide="chevron-down" :class="activeFaq === 3 ? 'rotate-180' : ''" class="w-4 h-4 text-blue-500 transition-transform"></i>
+                    </button>
+                    <div x-show="activeFaq === 3" x-transition class="p-4 bg-slate-900/5 dark:bg-white/5 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Documentation tracking modules strictly parse valid unencrypted .PDF payloads bounded up to a maximum distribution sizing ceiling of 10MB per unique file pointer node.
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section x-show="activeTab === 'contact'" x-transition class="max-w-5xl mx-auto space-y-8">
+            <div>
+                <h2 class="text-3xl font-extrabold tracking-tight">Central Support Command</h2>
+                <p class="text-xs text-slate-400">Get in touch directly with national command helpdesk frameworks.</p>
+            </div>
+
+            <div class="grid md:grid-cols-12 gap-8 items-start">
+                <div class="md:col-span-5 space-y-4">
+                    <div class="glass-panel p-5 rounded-xl border border-white/20 flex gap-4 items-center">
+                        <div class="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0"><i data-lucide="phone" class="w-5 h-5"></i></div>
+                        <div><p class="text-[10px] font-bold text-slate-400 uppercase">Hotline Support</p><p class="text-sm font-semibold font-mono">+62 (21) 500-9821</p></div>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl border border-white/20 flex gap-4 items-center">
+                        <div class="w-10 h-10 rounded-lg bg-cyan-500/10 text-cyan-500 flex items-center justify-center shrink-0"><i data-lucide="mail" class="w-5 h-5"></i></div>
+                        <div><p class="text-[10px] font-bold text-slate-400 uppercase">Electronic Delivery Desk</p><p class="text-sm font-semibold font-mono">helpdesk@smbp.kemdikbud.go.id</p></div>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl border border-white/20 flex gap-4 items-center">
+                        <div class="w-10 h-10 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center
